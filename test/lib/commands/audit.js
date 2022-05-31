@@ -281,7 +281,40 @@ t.test('audit signatures', async t => {
     npmOutput = []
   })
 
-  function validInstall () {
+  const VALID_REGISTRY_KEYS = {
+    keys: [{
+      expires: null,
+      keyid: 'SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA',
+      keytype: 'ecdsa-sha2-nistp256',
+      scheme: 'ecdsa-sha2-nistp256',
+      key: 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+' +
+           'IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg==',
+    }],
+  }
+
+  const MISMATCHING_REGISTRY_KEYS = {
+    keys: [{
+      expires: null,
+      keyid: 'SHA256:2l3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA',
+      keytype: 'ecdsa-sha2-nistp256',
+      scheme: 'ecdsa-sha2-nistp256',
+      key: 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+' +
+           'IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg==',
+    }],
+  }
+
+  const EXPIRED_REGISTRY_KEYS = {
+    keys: [{
+      expires: '2021-01-11T15:45:42.144Z',
+      keyid: 'SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA',
+      keytype: 'ecdsa-sha2-nistp256',
+      scheme: 'ecdsa-sha2-nistp256',
+      key: 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+' +
+           'IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg==',
+    }],
+  }
+
+  function installWithValidSigs () {
     return t.testdir({
       'package.json': JSON.stringify({
         name: 'test-dep',
@@ -324,7 +357,7 @@ t.test('audit signatures', async t => {
     })
   }
 
-  function validInstallWithAlias () {
+  function installWithAlias () {
     return t.testdir({
       'package.json': JSON.stringify({
         name: 'test-dep',
@@ -772,52 +805,10 @@ t.test('audit signatures', async t => {
     await registry.package({ manifest })
   }
 
-  function validKeys () {
-    registry.nock.get('/-/npm/v1/keys')
-      .reply(200, {
-        keys: [{
-          expires: null,
-          keyid: 'SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA',
-          keytype: 'ecdsa-sha2-nistp256',
-          scheme: 'ecdsa-sha2-nistp256',
-          key: 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+' +
-               'IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg==',
-        }],
-      })
-  }
-
-  function mismatchingKeys () {
-    registry.nock.get('/-/npm/v1/keys')
-      .reply(200, {
-        keys: [{
-          expires: null,
-          keyid: 'SHA256:2l3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA',
-          keytype: 'ecdsa-sha2-nistp256',
-          scheme: 'ecdsa-sha2-nistp256',
-          key: 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+' +
-               'IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg==',
-        }],
-      })
-  }
-
-  function expiredKeys () {
-    registry.nock.get('/-/npm/v1/keys')
-      .reply(200, {
-        keys: [{
-          expires: '2021-01-11T15:45:42.144Z',
-          keyid: 'SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA',
-          keytype: 'ecdsa-sha2-nistp256',
-          scheme: 'ecdsa-sha2-nistp256',
-          key: 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1Olb3zMAFFxXKHiIkQO5cJ3Yhl5i6UPp+' +
-               'IhuteBJbuHcA5UogKo0EWtlWwW6KSaKoTNEYL7JlCQiVnkhBktUgg==',
-        }],
-      })
-  }
-
   t.test('with valid signatures', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     await manifestWithValidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -828,7 +819,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with valid signatures using alias', async t => {
-    npm.prefix = validInstallWithAlias()
+    npm.prefix = installWithAlias()
     const manifest = registry.manifest({
       name: 'node-fetch',
       packuments: [{
@@ -848,7 +839,7 @@ t.test('audit signatures', async t => {
       }],
     })
     await registry.package({ manifest })
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -952,7 +943,7 @@ t.test('audit signatures', async t => {
     })
     await registry.package({ manifest: asyncManifest })
     await manifestWithInvalidSigs('node-fetch', '1.6.0')
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -967,7 +958,7 @@ t.test('audit signatures', async t => {
   t.test('with bundled and peer deps and no signatures', async t => {
     npm.prefix = installWithPeerDeps()
     await manifestWithValidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -978,9 +969,9 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with invalid signatures', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     await manifestWithInvalidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -995,7 +986,7 @@ t.test('audit signatures', async t => {
     npm.prefix = installWithMultipleDeps()
     await manifestWithValidSigs()
     await manifestWithoutSigs('async', '1.1.1')
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1011,7 +1002,7 @@ t.test('audit signatures', async t => {
     npm.prefix = installWithMultipleDeps()
     await manifestWithInvalidSigs()
     await manifestWithoutSigs('async', '1.1.1')
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1027,7 +1018,7 @@ t.test('audit signatures', async t => {
     npm.prefix = installWithMultipleDeps()
     await manifestWithInvalidSigs('kms-demo', '1.0.0')
     await manifestWithInvalidSigs('async', '1.1.1')
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1040,7 +1031,7 @@ t.test('audit signatures', async t => {
     npm.prefix = installWithMultipleDeps()
     await manifestWithoutSigs('kms-demo', '1.0.0')
     await manifestWithoutSigs('async', '1.1.1')
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1050,10 +1041,9 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with signatures but no public keys', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     await manifestWithValidSigs()
-    registry.nock.get('/-/npm/v1/keys')
-      .reply(404)
+    registry.nock.get('/-/npm/v1/keys').reply(404)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1063,9 +1053,9 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with signatures but the public keys are expired', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     await manifestWithValidSigs()
-    expiredKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, EXPIRED_REGISTRY_KEYS)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1075,9 +1065,9 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with signatures but the public keyid does not match', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     await manifestWithValidSigs()
-    mismatchingKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, MISMATCHING_REGISTRY_KEYS)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1087,9 +1077,9 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with keys but missing signature', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     await manifestWithoutSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1103,10 +1093,10 @@ t.test('audit signatures', async t => {
   })
 
   t.test('output details about missing signatures', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     npm.config.set('log-missing-names', true)
     await manifestWithoutSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1120,10 +1110,10 @@ t.test('audit signatures', async t => {
   })
 
   t.test('json output with valid signatures', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     npm.config.set('json', true)
     await manifestWithValidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1134,10 +1124,10 @@ t.test('audit signatures', async t => {
   })
 
   t.test('json output with invalid signatures', async t => {
-    npm.prefix = validInstall()
+    npm.prefix = installWithValidSigs()
     npm.config.set('json', true)
     await manifestWithInvalidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1152,7 +1142,7 @@ t.test('audit signatures', async t => {
     npm.config.set('json', true)
     await manifestWithInvalidSigs()
     await manifestWithoutSigs('async', '1.1.1')
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1167,7 +1157,7 @@ t.test('audit signatures', async t => {
     npm.prefix = installWithMultipleDeps()
     npm.config.set('omit', ['dev'])
     await manifestWithValidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1337,7 +1327,7 @@ t.test('audit signatures', async t => {
       registry: registryUrl,
     })
     await manifestWithValidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     const manifest = thirdPartyRegistry.manifest({
       name: '@npmcli/arborist',
@@ -1407,7 +1397,7 @@ t.test('audit signatures', async t => {
     npm.prefix = installWithOptionalDeps()
 
     await manifestWithValidSigs()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await audit.exec(['signatures'])
 
@@ -1419,7 +1409,7 @@ t.test('audit signatures', async t => {
 
   t.test('errors when no installed dependencies', async t => {
     npm.prefix = noInstall()
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1439,7 +1429,7 @@ t.test('audit signatures', async t => {
       node_modules: {},
     })
 
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1465,7 +1455,7 @@ t.test('audit signatures', async t => {
         },
       },
     })
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1492,7 +1482,7 @@ t.test('audit signatures', async t => {
       },
     })
 
-    validKeys()
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await t.rejects(
       audit.exec(['signatures']),
@@ -1512,10 +1502,10 @@ t.test('audit signatures', async t => {
 
   t.test('with color output enabled', async t => {
     t.test('with invalid signatures', async t => {
-      npm.prefix = validInstall()
+      npm.prefix = installWithValidSigs()
       npm.color = true
       await manifestWithInvalidSigs()
-      validKeys()
+      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
       await audit.exec(['signatures'])
 
@@ -1534,7 +1524,7 @@ t.test('audit signatures', async t => {
       npm.color = true
       await manifestWithValidSigs()
       await manifestWithoutSigs('async', '1.1.1')
-      validKeys()
+      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
       await audit.exec(['signatures'])
 
@@ -1548,7 +1538,7 @@ t.test('audit signatures', async t => {
       npm.color = true
       await manifestWithInvalidSigs('kms-demo', '1.0.0')
       await manifestWithInvalidSigs('async', '1.1.1')
-      validKeys()
+      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
       await audit.exec(['signatures'])
 
@@ -1562,7 +1552,7 @@ t.test('audit signatures', async t => {
       npm.color = true
       await manifestWithoutSigs('kms-demo', '1.0.0')
       await manifestWithoutSigs('async', '1.1.1')
-      validKeys()
+      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
       await audit.exec(['signatures'])
 
@@ -1614,7 +1604,7 @@ t.test('audit signatures', async t => {
       })
       await registry.package({ manifest: asyncManifest })
       await registry.package({ manifest: lightCycleManifest })
-      validKeys()
+      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
       await audit.exec(['signatures'])
 
@@ -1665,7 +1655,7 @@ t.test('audit signatures', async t => {
       })
       await registry.package({ manifest: asyncManifest })
       await registry.package({ manifest: lightCycleManifest })
-      validKeys()
+      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
       await audit.execWorkspaces(['signatures'], ['./packages/a'])
 
