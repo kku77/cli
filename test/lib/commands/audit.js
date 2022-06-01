@@ -2,6 +2,7 @@ const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
 const t = require('tap')
+const chalk = require('chalk')
 
 const { load: loadMockNpm, fake: mockNpm } = require('../../fixtures/mock-npm')
 const MockRegistry = require('../../fixtures/mock-registry.js')

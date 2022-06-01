@@ -153,7 +153,7 @@ audited 2 packages in xxx
 
 1 package has a [1mverified[22m registry signature
 
-1 package has a [1m[35mmissing[39m[22m registry signature but the registry is providing signing keys
+1 package has a [1m[31mmissing[39m[22m registry signature but the registry is providing signing keys
   run \`npm audit signatures --log-missing-names\` for details
 `
 
@@ -183,7 +183,7 @@ Someone might have tampered with these packages since they where published on th
 exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with multiple missing signatures > must match snapshot 1`] = `
 audited 2 packages in xxx
 
-2 packages have [1m[35mmissing[39m[22m registry signatures but the registry is providing signing keys
+2 packages have [1m[31mmissing[39m[22m registry signatures but the registry is providing signing keys
   run \`npm audit signatures --log-missing-names\` for details
 `
 
