@@ -42,7 +42,7 @@ found 0 vulnerabilities
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures ignores optional dependencies > must match snapshot 1`] = `
-verified registry signatures, audited 1 package in 0s
+verified registry signatures, audited 1 package in xxx
 
 `
 
@@ -90,12 +90,12 @@ verified registry signatures, audited 2 packages in xxx
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures omit dev dependencies with missing signature > must match snapshot 1`] = `
-verified registry signatures, audited 1 package in 0s
+verified registry signatures, audited 1 package in xxx
 
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures output details about missing signatures > must match snapshot 1`] = `
-audited 1 package in 0s
+audited 1 package in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys:
 
@@ -103,7 +103,7 @@ kms-demo@1.0.0
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with invalid signatures errors > must match snapshot 1`] = `
-audited 1 package in 0s
+audited 1 package in xxx
 
 1 package has an invalid registry signature:
 
@@ -114,14 +114,14 @@ Someone might have tampered with this package since it was published on the regi
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with keys and missing signatures errors > must match snapshot 1`] = `
-audited 1 package in 0s
+audited 1 package in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys
   run \`npm audit signatures --log-missing-names\` for details
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with keys and signatures > must match snapshot 1`] = `
-verified registry signatures, audited 1 package in 0s
+verified registry signatures, audited 1 package in xxx
 
 `
 
@@ -144,7 +144,7 @@ Someone might have tampered with this package since it was published on the regi
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with bundled and peer deps and no signatures > must match snapshot 1`] = `
-verified registry signatures, audited 1 package in 0s
+verified registry signatures, audited 1 package in xxx
 
 `
 
@@ -158,7 +158,7 @@ audited 2 packages in xxx
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with invalid signatures > must match snapshot 1`] = `
-audited 1 package in 0s
+audited 1 package in xxx
 
 1 package has an [1m[31minvalid[39m[22m registry signature:
 
@@ -188,7 +188,7 @@ audited 2 packages in xxx
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with invalid signatures > must match snapshot 1`] = `
-audited 1 package in 0s
+audited 1 package in xxx
 
 1 package has an invalid registry signature:
 
@@ -199,7 +199,7 @@ Someone might have tampered with this package since it was published on the regi
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with keys but missing signature > must match snapshot 1`] = `
-audited 1 package in 0s
+audited 1 package in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys
   run \`npm audit signatures --log-missing-names\` for details
@@ -247,12 +247,12 @@ audited 2 packages in xxx
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with valid signatures > must match snapshot 1`] = `
-verified registry signatures, audited 1 package in 0s
+verified registry signatures, audited 1 package in xxx
 
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with valid signatures using alias > must match snapshot 1`] = `
-verified registry signatures, audited 1 package in 0s
+verified registry signatures, audited 1 package in xxx
 
 `
 

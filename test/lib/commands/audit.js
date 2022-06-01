@@ -2,7 +2,6 @@ const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
 const t = require('tap')
-const chalk = require('chalk')
 
 const { load: loadMockNpm, fake: mockNpm } = require('../../fixtures/mock-npm')
 const MockRegistry = require('../../fixtures/mock-registry.js')
@@ -10,7 +9,7 @@ const MockRegistry = require('../../fixtures/mock-registry.js')
 const gunzip = zlib.gunzipSync
 const gzip = zlib.gzipSync
 
-t.cleanSnapshot = str => str.replace(/packages in [0-9]+[a-z]+/g, 'packages in xxx')
+t.cleanSnapshot = str => str.replace(/package(s)? in [0-9]+[a-z]+/g, 'package$1 in xxx')
 
 const tree = {
   'package.json': JSON.stringify({
