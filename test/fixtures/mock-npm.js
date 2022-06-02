@@ -1,4 +1,3 @@
-const chalk = require('chalk')
 const fs = require('fs').promises
 const os = require('os')
 const path = require('path')
@@ -184,7 +183,6 @@ const realConfig = require('../../lib/utils/config')
 // npm.config You still need a separate flatOptions. Tests should migrate to
 // using the real npm mock above
 class MockNpm {
-  #chalk = null
 
   constructor (base = {}, t) {
     this._mockOutputs = []
@@ -225,17 +223,6 @@ class MockNpm {
     if (config.loglevel) {
       this.config.set('loglevel', config.loglevel)
     }
-  }
-
-  get chalk () {
-    if (!this.#chalk) {
-      let level = chalk.level
-      if (!this.color) {
-        level = 0
-      }
-      this.#chalk = new chalk.Instance({ level })
-    }
-    return this.#chalk
   }
 
   get global () {
