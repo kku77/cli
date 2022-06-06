@@ -116,8 +116,9 @@ Someone might have tampered with this package since it was published on the regi
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with keys and missing signatures errors > must match snapshot 1`] = `
 audited 1 package in xxx
 
-1 package has a missing registry signature but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
+1 package has a missing registry signature but the registry is providing signing keys:
+
+@npmcli/arborist@1.0.14 (https://verdaccio-clone.org)
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with keys and signatures > must match snapshot 1`] = `
@@ -125,15 +126,12 @@ verified registry signatures, audited 1 package in xxx
 
 `
 
-exports[`test/lib/commands/audit.js TAP audit signatures third-party registry without keys does not verify > must match snapshot 1`] = `
-
-`
-
 exports[`test/lib/commands/audit.js TAP audit signatures with both invalid and missing signatures > must match snapshot 1`] = `
 audited 2 packages in xxx
 
-1 package has a missing registry signature but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
+1 package has a missing registry signature but the registry is providing signing keys:
+
+async@1.1.1
 
 1 package has an invalid registry signature:
 
@@ -148,15 +146,6 @@ verified registry signatures, audited 1 package in xxx
 
 `
 
-exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with both valid and missing signatures > must match snapshot 1`] = `
-audited 2 packages in xxx
-
-1 package has a [1mverified[22m registry signature
-
-1 package has a [1m[31mmissing[39m[22m registry signature but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
-`
-
 exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with invalid signatures > must match snapshot 1`] = `
 audited 1 package in xxx
 
@@ -166,25 +155,6 @@ audited 1 package in xxx
 
 Someone might have tampered with this package since it was published on the registry!
 
-`
-
-exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with multiple invalid signatures > must match snapshot 1`] = `
-audited 2 packages in xxx
-
-2 packages have [1m[31minvalid[39m[22m registry signatures:
-
-[31masync@1.1.1[39m
-[31mkms-demo@1.0.0[39m
-
-Someone might have tampered with these packages since they where published on the registry!
-
-`
-
-exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with multiple missing signatures > must match snapshot 1`] = `
-audited 2 packages in xxx
-
-2 packages have [1m[31mmissing[39m[22m registry signatures but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with invalid signatures > must match snapshot 1`] = `
@@ -201,8 +171,9 @@ Someone might have tampered with this package since it was published on the regi
 exports[`test/lib/commands/audit.js TAP audit signatures with keys but missing signature > must match snapshot 1`] = `
 audited 1 package in xxx
 
-1 package has a missing registry signature but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
+1 package has a missing registry signature but the registry is providing signing keys:
+
+kms-demo@1.0.0
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with multiple invalid signatures > must match snapshot 1`] = `
@@ -220,8 +191,10 @@ Someone might have tampered with these packages since they where published on th
 exports[`test/lib/commands/audit.js TAP audit signatures with multiple missing signatures > must match snapshot 1`] = `
 audited 2 packages in xxx
 
-2 packages have missing registry signatures but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
+2 packages have missing registry signatures but the registry is providing signing keys:
+
+async@1.1.1
+kms-demo@1.0.0
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with multiple valid signatures and one invalid > must match snapshot 1`] = `
@@ -242,8 +215,9 @@ audited 2 packages in xxx
 
 1 package has a verified registry signature
 
-1 package has a missing registry signature but the registry is providing signing keys
-  run \`npm audit signatures --log-missing-names\` for details
+1 package has a missing registry signature but the registry is providing signing keys:
+
+async@1.1.1
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with valid signatures > must match snapshot 1`] = `

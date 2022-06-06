@@ -1,5 +1,5 @@
-const fs = require('fs').promises
 const os = require('os')
+const fs = require('fs').promises
 const path = require('path')
 const mockLogs = require('./mock-logs')
 const mockGlobals = require('./mock-globals')
@@ -183,7 +183,6 @@ const realConfig = require('../../lib/utils/config')
 // npm.config You still need a separate flatOptions. Tests should migrate to
 // using the real npm mock above
 class MockNpm {
-
   constructor (base = {}, t) {
     this._mockOutputs = []
     this.isMockNpm = true

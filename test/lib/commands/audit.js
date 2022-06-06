@@ -239,7 +239,6 @@ t.test('completion', async t => {
 })
 
 t.test('audit signatures', async t => {
-
   const VALID_REGISTRY_KEYS = {
     keys: [{
       expires: null,
@@ -869,7 +868,7 @@ t.test('audit signatures', async t => {
             },
           },
         }),
-      }
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     await manifestWithValidSigs({ registry })
@@ -1009,7 +1008,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('with signatures but no public keys', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: installWithValidSigs,
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
@@ -1018,13 +1017,13 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /no corresponding public key can be found on https:\/\/registry.npmjs.org\/-\/npm\/v1\/keys/,
+      /no corresponding public key can be found/,
       'should throw with error'
     )
   })
 
   t.test('with signatures but the public keys are expired', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: installWithValidSigs,
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
@@ -1033,13 +1032,13 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /the corresponding public key on https:\/\/registry.npmjs.org\/-\/npm\/v1\/keys has expired/,
+      /the corresponding public key has expired/,
       'should throw with error'
     )
   })
 
   t.test('with signatures but the public keyid does not match', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: installWithValidSigs,
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
@@ -1048,7 +1047,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /no corresponding public key can be found on https:\/\/registry.npmjs.org\/-\/npm\/v1\/keys/,
+      /no corresponding public key can be found/,
       'should throw with error'
     )
   })
@@ -1075,9 +1074,6 @@ t.test('audit signatures', async t => {
   t.test('output details about missing signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithValidSigs,
-      config: {
-        'log-missing-names': true
-      }
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     await manifestWithoutSigs({ registry })
@@ -1098,8 +1094,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithValidSigs,
       config: {
-        json: true
-      }
+        json: true,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     await manifestWithValidSigs({ registry })
@@ -1117,8 +1113,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithValidSigs,
       config: {
-        json: true
-      }
+        json: true,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     await manifestWithInvalidSigs({ registry })
@@ -1136,8 +1132,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithMultipleDeps,
       config: {
-        json: true
-      }
+        json: true,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     await manifestWithInvalidSigs({ registry })
@@ -1158,7 +1154,7 @@ t.test('audit signatures', async t => {
       prefixDir: installWithMultipleDeps,
       config: {
         omit: ['dev'],
-      }
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     await manifestWithValidSigs({ registry })
@@ -1196,8 +1192,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithThirdPartyRegistry,
       config: {
-        '@npmcli:registry': registryUrl
-      }
+        '@npmcli:registry': registryUrl,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: registryUrl })
 
@@ -1245,8 +1241,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithThirdPartyRegistry,
       config: {
-        '@npmcli:registry': registryUrl
-      }
+        '@npmcli:registry': registryUrl,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: registryUrl })
 
@@ -1293,8 +1289,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithThirdPartyRegistry,
       config: {
-        '@npmcli:registry': registryUrl
-      }
+        '@npmcli:registry': registryUrl,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: registryUrl })
 
@@ -1335,8 +1331,8 @@ t.test('audit signatures', async t => {
     const { npm, joinedOutput } = await loadMockNpm(t, {
       prefixDir: installWithMultipleRegistries,
       config: {
-        '@npmcli:registry': registryUrl
-      }
+        '@npmcli:registry': registryUrl,
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     const thirdPartyRegistry = new MockRegistry({
@@ -1386,13 +1382,13 @@ t.test('audit signatures', async t => {
   })
 
   t.test('errors with an empty install', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: {
         'package.json': JSON.stringify({
           name: 'test-dep',
           version: '1.0.0',
         }),
-      }
+      },
     })
 
     await t.rejects(
@@ -1402,7 +1398,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('errors when the keys endpoint errors', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: installWithMultipleDeps,
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
@@ -1433,7 +1429,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('errors when no installed dependencies', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: noInstall,
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
@@ -1446,7 +1442,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('should skip missing non-prod deps', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: {
         'package.json': JSON.stringify({
           name: 'delta',
@@ -1456,7 +1452,7 @@ t.test('audit signatures', async t => {
           },
         }, null, 2),
         node_modules: {},
-      }
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
@@ -1468,7 +1464,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('should skip invalid pkg ranges', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: {
         'package.json': JSON.stringify({
           name: 'delta',
@@ -1485,7 +1481,7 @@ t.test('audit signatures', async t => {
             }, null, 2),
           },
         },
-      }
+      },
     })
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
     registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
@@ -1497,7 +1493,7 @@ t.test('audit signatures', async t => {
   })
 
   t.test('should skip git specs', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: {
         'package.json': JSON.stringify({
           name: 'delta',
@@ -1514,7 +1510,7 @@ t.test('audit signatures', async t => {
             }, null, 2),
           },
         },
-      }
+      },
     })
 
     const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
@@ -1527,8 +1523,8 @@ t.test('audit signatures', async t => {
   })
 
   t.test('errors for global packages', async t => {
-    const { npm, joinedOutput } = await loadMockNpm(t, {
-      config: { global: true }
+    const { npm } = await loadMockNpm(t, {
+      config: { global: true },
     })
 
     await t.rejects(
@@ -1559,61 +1555,6 @@ t.test('audit signatures', async t => {
       )
       t.matchSnapshot(joinedOutput())
     })
-
-    // TODO fix
-    // t.test('with both valid and missing signatures', async t => {
-    //   const { npm, joinedOutput } = await loadMockNpm(t, {
-    //     prefixDir: installWithMultipleDeps,
-    //     config: { color: 'always' },
-    //   })
-    //   const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
-
-    //   await manifestWithValidSigs({ registry })
-    //   await manifestWithoutSigs({ registry, name: 'async', version: '1.1.1' })
-    //   registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
-
-    //   await npm.exec('audit', ['signatures'])
-
-    //   t.equal(process.exitCode, 1, 'should exit with error')
-    //   process.exitCode = 0
-    //   t.matchSnapshot(joinedOutput())
-    // })
-
-    // TODO fix
-    // t.test('with multiple invalid signatures', async t => {
-    //   const { npm, joinedOutput } = await loadMockNpm(t, {
-    //     prefixDir: installWithMultipleDeps,
-    //     config: { color: 'always' },
-    //   })
-    //   const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
-    //   await manifestWithInvalidSigs({ registry, name: 'kms-demo', version: '1.0.0' })
-    //   await manifestWithInvalidSigs({ registry, name: 'async', version: '1.1.1' })
-    //   registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
-
-    //   await npm.exec('audit', ['signatures'])
-
-    //   t.equal(process.exitCode, 1, 'should exit with error')
-    //   process.exitCode = 0
-    //   t.matchSnapshot(joinedOutput())
-    // })
-
-    // TODO fix
-    // t.test('with multiple missing signatures', async t => {
-    //   const { npm, joinedOutput } = await loadMockNpm(t, {
-    //     prefixDir: installWithMultipleDeps,
-    //     config: { color: 'always' },
-    //   })
-    //   const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
-    //   await manifestWithoutSigs({ registry, name: 'kms-demo', version: '1.0.0' })
-    //   await manifestWithoutSigs({ registry, name: 'async', version: '1.1.1' })
-    //   registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
-
-    //   await npm.exec('audit', ['signatures'])
-
-    //   t.equal(process.exitCode, 1, 'should exit with error')
-    //   process.exitCode = 0
-    //   t.matchSnapshot(joinedOutput())
-    // })
   })
 
   t.test('workspaces', async t => {
@@ -1727,17 +1668,16 @@ t.test('audit signatures', async t => {
 
     // TODO: This should verify kms-demo, but doesn't because arborist filters
     // workspace deps even if they're also root deps
-    // t.test('verifies registry dep if workspaces is disabled', async t => {
-    //   const { npm, joinedOutput } = await loadMockNpm(t, {
-    //     prefixDir: workspaceInstall,
-    //     config: { workspaces: true },
-    //   })
-    //   const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
+    t.test('verifies registry dep if workspaces is disabled', async t => {
+      const { npm } = await loadMockNpm(t, {
+        prefixDir: workspaceInstall,
+        config: { workspaces: false },
+      })
 
-    //   await t.rejects(
-    //     npm.exec('audit', ['signatures']),
-    //     /No dependencies found in current install/
-    //   )
-    // })
+      await t.rejects(
+        npm.exec('audit', ['signatures']),
+        /No dependencies found in current install/
+      )
+    })
   })
 })
