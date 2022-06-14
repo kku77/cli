@@ -471,6 +471,9 @@ t.test('audit signatures', async t => {
         'package.json': JSON.stringify({
           name: 'async',
           version: '1.1.1',
+          dependencies: {
+            'kms-demo': '^1.0.0',
+          },
         }),
       },
     },
@@ -503,6 +506,9 @@ t.test('audit signatures', async t => {
         },
         async: {
           version: '1.1.1',
+          dependencies: {
+            'kms-demo': '^1.0.0',
+          },
         },
       },
     }),
