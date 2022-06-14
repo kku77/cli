@@ -146,23 +146,23 @@ verified registry signatures, audited 1 package in xxx
 
 `
 
-exports[`test/lib/commands/audit.js TAP audit signatures with color output enabled with invalid signatures > must match snapshot 1`] = `
-audited 1 package in xxx
-
-1 package has an [1m[31minvalid[39m[22m registry signature:
-
-[31mkms-demo@1.0.0[39m
-
-Someone might have tampered with this package since it was published on the registry!
-
-`
-
 exports[`test/lib/commands/audit.js TAP audit signatures with invalid signatures > must match snapshot 1`] = `
 audited 1 package in xxx
 
 1 package has an invalid registry signature:
 
 kms-demo@1.0.0
+
+Someone might have tampered with this package since it was published on the registry!
+
+`
+
+exports[`test/lib/commands/audit.js TAP audit signatures with invalid signtaures and color output enabled > must match snapshot 1`] = `
+audited 1 package in xxx
+
+1 package has an [1m[31minvalid[39m[22m registry signature:
+
+[31mkms-demo@1.0.0[39m
 
 Someone might have tampered with this package since it was published on the registry!
 

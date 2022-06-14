@@ -1489,8 +1489,6 @@ t.test('audit signatures', async t => {
         },
       },
     })
-    const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
-    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
@@ -1540,27 +1538,25 @@ t.test('audit signatures', async t => {
     )
   })
 
-  t.test('with color output enabled', async t => {
-    t.test('with invalid signatures', async t => {
-      const { npm, joinedOutput } = await loadMockNpm(t, {
-        prefixDir: installWithValidSigs,
-        config: { color: 'always' },
-      })
-      const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
-      await manifestWithInvalidSigs({ registry })
-      registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
-
-      await npm.exec('audit', ['signatures'])
-
-      t.equal(process.exitCode, 1, 'should exit with error')
-      process.exitCode = 0
-      t.match(
-        joinedOutput(),
-        // eslint-disable-next-line no-control-regex
-        /\u001b\[1m\u001b\[31minvalid\u001b\[39m\u001b\[22m registry signature/
-      )
-      t.matchSnapshot(joinedOutput())
+  t.test('with invalid signtaures and color output enabled', async t => {
+    const { npm, joinedOutput } = await loadMockNpm(t, {
+      prefixDir: installWithValidSigs,
+      config: { color: 'always' },
     })
+    const registry = new MockRegistry({ tap: t, registry: npm.config.get('registry') })
+    await manifestWithInvalidSigs({ registry })
+    registry.nock.get('/-/npm/v1/keys').reply(200, VALID_REGISTRY_KEYS)
+
+    await npm.exec('audit', ['signatures'])
+
+    t.equal(process.exitCode, 1, 'should exit with error')
+    process.exitCode = 0
+    t.match(
+      joinedOutput(),
+      // eslint-disable-next-line no-control-regex
+      /\u001b\[1m\u001b\[31minvalid\u001b\[39m\u001b\[22m registry signature/
+    )
+    t.matchSnapshot(joinedOutput())
   })
 
   t.test('workspaces', async t => {
