@@ -48,40 +48,50 @@ verified registry signatures, audited 1 package in xxx
 
 exports[`test/lib/commands/audit.js TAP audit signatures json output with invalid and missing signatures > must match snapshot 1`] = `
 {
-  "invalid": {
-    "node_modules/kms-demo": {
+  "invalid": [
+    {
+      "name": "kms-demo",
       "version": "1.0.0",
+      "location": "node_modules/kms-demo",
       "resolved": "https://registry.npmjs.org/kms-demo/-/kms-demo-1.0.0.tgz",
       "integrity": "sha512-QqZ7VJ/8xPkS9s2IWB7Shj3qTJdcRyeXKbPQnsZjsPEwvutGv0EGeVchPcauoiDFJlGbZMFq5GDCurAGNSghJQ==",
       "signature": "bogus",
       "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
     }
-  },
-  "missing": {
-    "node_modules/async": {
+  ],
+  "missing": [
+    {
+      "name": "async",
       "version": "1.1.1",
+      "location": "node_modules/async",
       "resolved": "https://registry.npmjs.org/async/-/async-1.1.1.tgz"
     }
-  }
+  ]
 }
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures json output with invalid signatures > must match snapshot 1`] = `
 {
-  "invalid": {
-    "node_modules/kms-demo": {
+  "invalid": [
+    {
+      "name": "kms-demo",
       "version": "1.0.0",
+      "location": "node_modules/kms-demo",
       "resolved": "https://registry.npmjs.org/kms-demo/-/kms-demo-1.0.0.tgz",
       "integrity": "sha512-QqZ7VJ/8xPkS9s2IWB7Shj3qTJdcRyeXKbPQnsZjsPEwvutGv0EGeVchPcauoiDFJlGbZMFq5GDCurAGNSghJQ==",
       "signature": "bogus",
       "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
     }
-  }
+  ],
+  "missing": []
 }
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures json output with valid signatures > must match snapshot 1`] = `
-{}
+{
+  "invalid": [],
+  "missing": []
+}
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures multiple registries with keys and signatures > must match snapshot 1`] = `

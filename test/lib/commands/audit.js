@@ -1111,7 +1111,7 @@ t.test('audit signatures', async t => {
 
     t.equal(process.exitCode, 0, 'should exit successfully')
     process.exitCode = 0
-    t.match(joinedOutput(), /{}/)
+    t.match(joinedOutput(), JSON.stringify({ invalid: [], missing: [] }, null, 2))
     t.matchSnapshot(joinedOutput())
   })
 
@@ -1130,7 +1130,6 @@ t.test('audit signatures', async t => {
 
     t.equal(process.exitCode, 1, 'should exit with error')
     process.exitCode = 0
-    t.match(joinedOutput(), /"invalid": {\n\s+"node_modules\/kms-demo": {/)
     t.matchSnapshot(joinedOutput())
   })
 
@@ -1150,8 +1149,6 @@ t.test('audit signatures', async t => {
 
     t.equal(process.exitCode, 1, 'should exit with error')
     process.exitCode = 0
-    t.match(joinedOutput(), /"invalid": {\n\s+"node_modules\/kms-demo": {/)
-    t.match(joinedOutput(), /"missing": {\n\s+"node_modules\/async": {/)
     t.matchSnapshot(joinedOutput())
   })
 
