@@ -99,7 +99,7 @@ audited 1 package in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys:
 
-kms-demo@1.0.0
+kms-demo@1.0.0 (https://registry.npmjs.org/)
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with invalid signatures errors > must match snapshot 1`] = `
@@ -131,11 +131,11 @@ audited 2 packages in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys:
 
-async@1.1.1
+async@1.1.1 (https://registry.npmjs.org/)
 
 1 package has an invalid registry signature:
 
-kms-demo@1.0.0
+kms-demo@1.0.0 (https://registry.npmjs.org/)
 
 Someone might have tampered with this package since it was published on the registry!
 
@@ -151,7 +151,7 @@ audited 1 package in xxx
 
 1 package has an invalid registry signature:
 
-kms-demo@1.0.0
+kms-demo@1.0.0 (https://registry.npmjs.org/)
 
 Someone might have tampered with this package since it was published on the registry!
 
@@ -162,7 +162,7 @@ audited 1 package in xxx
 
 1 package has an [1m[31minvalid[39m[22m registry signature:
 
-[31mkms-demo@1.0.0[39m
+[31mkms-demo@1.0.0[39m (https://registry.npmjs.org/)
 
 Someone might have tampered with this package since it was published on the registry!
 
@@ -173,7 +173,7 @@ audited 1 package in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys:
 
-kms-demo@1.0.0
+kms-demo@1.0.0 (https://registry.npmjs.org/)
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with multiple invalid signatures > must match snapshot 1`] = `
@@ -181,8 +181,8 @@ audited 2 packages in xxx
 
 2 packages have invalid registry signatures:
 
-async@1.1.1
-kms-demo@1.0.0
+async@1.1.1 (https://registry.npmjs.org/)
+kms-demo@1.0.0 (https://registry.npmjs.org/)
 
 Someone might have tampered with these packages since they where published on the registry!
 
@@ -193,8 +193,8 @@ audited 2 packages in xxx
 
 2 packages have missing registry signatures but the registry is providing signing keys:
 
-async@1.1.1
-kms-demo@1.0.0
+async@1.1.1 (https://registry.npmjs.org/)
+kms-demo@1.0.0 (https://registry.npmjs.org/)
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with multiple valid signatures and one invalid > must match snapshot 1`] = `
@@ -204,7 +204,7 @@ audited 3 packages in xxx
 
 1 package has an invalid registry signature:
 
-node-fetch@1.6.0
+node-fetch@1.6.0 (https://registry.npmjs.org/)
 
 Someone might have tampered with this package since it was published on the registry!
 
@@ -217,7 +217,7 @@ audited 2 packages in xxx
 
 1 package has a missing registry signature but the registry is providing signing keys:
 
-async@1.1.1
+async@1.1.1 (https://registry.npmjs.org/)
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with valid signatures > must match snapshot 1`] = `
