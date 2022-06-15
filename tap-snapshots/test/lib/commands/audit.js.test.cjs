@@ -44,6 +44,8 @@ found 0 vulnerabilities
 exports[`test/lib/commands/audit.js TAP audit signatures ignores optional dependencies > must match snapshot 1`] = `
 verified registry signatures, audited 1 package in xxx
 
+1 package has a verified registry signature
+
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures json output with invalid and missing signatures > must match snapshot 1`] = `
@@ -97,10 +99,14 @@ exports[`test/lib/commands/audit.js TAP audit signatures json output with valid 
 exports[`test/lib/commands/audit.js TAP audit signatures multiple registries with keys and signatures > must match snapshot 1`] = `
 verified registry signatures, audited 2 packages in xxx
 
+2 packages have verified registry signatures
+
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures omit dev dependencies with missing signature > must match snapshot 1`] = `
 verified registry signatures, audited 1 package in xxx
+
+1 package has a verified registry signature
 
 `
 
@@ -134,6 +140,8 @@ audited 1 package in xxx
 exports[`test/lib/commands/audit.js TAP audit signatures third-party registry with keys and signatures > must match snapshot 1`] = `
 verified registry signatures, audited 1 package in xxx
 
+1 package has a verified registry signature
+
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with both invalid and missing signatures > must match snapshot 1`] = `
@@ -153,6 +161,8 @@ Someone might have tampered with this package since it was published on the regi
 
 exports[`test/lib/commands/audit.js TAP audit signatures with bundled and peer deps and no signatures > must match snapshot 1`] = `
 verified registry signatures, audited 1 package in xxx
+
+1 package has a verified registry signature
 
 `
 
@@ -233,20 +243,28 @@ async@1.1.1 (https://registry.npmjs.org/)
 exports[`test/lib/commands/audit.js TAP audit signatures with valid signatures > must match snapshot 1`] = `
 verified registry signatures, audited 1 package in xxx
 
+1 package has a verified registry signature
+
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures with valid signatures using alias > must match snapshot 1`] = `
 verified registry signatures, audited 1 package in xxx
+
+1 package has a verified registry signature
 
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures workspaces verifies registry deps and ignores local workspace deps > must match snapshot 1`] = `
 verified registry signatures, audited 3 packages in xxx
 
+3 packages have verified registry signatures
+
 `
 
 exports[`test/lib/commands/audit.js TAP audit signatures workspaces verifies registry deps when filtering by workspace name > must match snapshot 1`] = `
 verified registry signatures, audited 2 packages in xxx
+
+2 packages have verified registry signatures
 
 `
 
