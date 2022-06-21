@@ -1,22 +1,27 @@
 'use strict'
 
+// TODO how many of these async functions do async operations?
+
 const { resolve } = require('path')
 const { parser, arrayDelimiter } = require('@npmcli/query')
 const localeCompare = require('@isaacs/string-locale-compare')('en')
 const npa = require('npm-package-arg')
 const minimatch = require('minimatch')
 const semver = require('semver')
+const pMap = require('p-map')
 
-// handle results for parsed query asts, results are stored in a map that
-// has a key that points to each ast selector node and stores the resulting
-// array of arborist nodes as its value, that is essential to how we handle
-// multiple query selectors, e.g: `#a, #b, #c` <- 3 diff ast selector nodes
+// default concurrency when mapping over tree objects
+const MAP_CONCURRENCY = 10
+
+// handle results for parsed query asts, results are stored in a map that has a
+// key that points to each ast selector node and stores the resulting array of
+// arborist nodes as its value, that is essential to how we handle multiple
+// query selectors, e.g: `#a, #b, #c` <- 3 diff ast selector nodes
 class Results {
-  #results = null
+  #results = new Map()
   #currentAstSelector = null
 
   constructor (rootAstNode) {
-    this.#results = new Map()
     this.#currentAstSelector = rootAstNode.nodes[0]
   }
 
@@ -33,17 +38,11 @@ class Results {
     this.#results.set(this.#currentAstSelector, value)
   }
 
-  // when collecting results to a root astNode, we traverse the list of
-  // child selector nodes and collect all of their resulting arborist nodes
-  // into a single/flat Set of items, this ensures we also deduplicate items
+  // when collecting results to a root astNode, we traverse the list of child
+  // selector nodes and collect all of their resulting arborist nodes into a
+  // single/flat Set of items, this ensures we also deduplicate items
   collect (rootAstNode) {
-    const acc = new Set()
-    for (const n of rootAstNode.nodes) {
-      for (const node of this.#results.get(n)) {
-        acc.add(node)
-      }
-    }
-    return acc
+    return new Set(rootAstNode.nodes.flatMap(n => this.#results.get(n)))
   }
 }
 
@@ -78,10 +77,10 @@ const retrieveNodesFromParsedAst = async ({
       return (String(pkg[attribute] || '').match(/\w+/g) || []).includes(value)
     },
     '*=' ({ attribute, value, pkg }) {
-      return String(pkg[attribute] || '').indexOf(value) > -1
+      return String(pkg[attribute] || '').includes(value)
     },
     '|=' ({ attribute, value, pkg }) {
-      return String(pkg[attribute] || '').split('-')[0] === value
+      return String(pkg[attribute] || '').startsWith(`${value}-`)
     },
     '^=' ({ attribute, value, pkg }) {
       return String(pkg[attribute] || '').startsWith(value)
@@ -90,43 +89,52 @@ const retrieveNodesFromParsedAst = async ({
       return String(pkg[attribute] || '').endsWith(value)
     },
   }))
-  const classesMap = new Map(Object.entries({
-    '.prod' (prevResults) {
-      return Promise.resolve(prevResults.filter(node =>
-        [...node.edgesIn].some(edge => edge.prod)))
+  const depTypesMap = new Map(Object.entries({
+    async '.prod' (prevResults) {
+      return prevResults.filter(node =>
+        [...node.edgesIn].some(edge => edge.prod)
+      )
     },
-    '.dev' (prevResults) {
-      return Promise.resolve(prevResults.filter(node =>
-        [...node.edgesIn].some(edge => edge.dev)))
+    async '.dev' (prevResults) {
+      return prevResults.filter(node =>
+        [...node.edgesIn].some(edge => edge.dev)
+      )
     },
-    '.optional' (prevResults) {
-      return Promise.resolve(prevResults.filter(node =>
-        [...node.edgesIn].some(edge => edge.optional)))
+    async '.optional' (prevResults) {
+      return prevResults.filter(node =>
+        [...node.edgesIn].some(edge => edge.optional)
+      )
     },
-    '.peer' (prevResults) {
-      return Promise.resolve(prevResults.filter(node =>
-        [...node.edgesIn].some(edge => edge.peer)))
+    async '.peer' (prevResults) {
+      return prevResults.filter(node =>
+        [...node.edgesIn].some(edge => edge.peer)
+      )
     },
-    '.workspace' (prevResults) {
-      return Promise.resolve(
-        prevResults.filter(node => node.isWorkspace))
+    async '.workspace' (prevResults) {
+      return prevResults.filter(node =>
+        node.isWorkspace
+      )
     },
-    '.bundled' (prevResults) {
-      return Promise.resolve(
-        prevResults.filter(node => node.inBundle))
+    async '.bundled' (prevResults) {
+      return prevResults.filter(node =>
+        node.inBundle
+      )
     },
   }))
 
-  const hasParent = (node, compareNodes) => {
+  // checks if a given node has a direct parent in any of the nodes provided in
+  // the compare nodes array
+  const hasParent = async (node, compareNodes) => {
     if (parentCache.has(node) && parentCache.get(node).has(compareNodes)) {
-      return Promise.resolve(true)
+      return true
     }
     const parentFound = compareNodes.some(compareNode => {
       // follows logical parent for link anscestors
-      return (node.isTop && node.resolveParent) === compareNode ||
+      if (node.isTop && (node.resolveParent === compareNode)) {
+        return true
+      }
       // follows edges-in to check if they match a possible parent
-      [...node.edgesIn].some(edge =>
-        edge && edge.from === compareNode)
+      return [...node.edgesIn].some(edge => edge && edge.from === compareNode)
     })
 
     if (parentFound) {
@@ -136,63 +144,71 @@ const retrieveNodesFromParsedAst = async ({
       parentCache.get(node).add(compareNodes)
     }
 
-    return Promise.resolve(parentFound)
+    return parentFound
   }
 
-  // checks if a given node is a descendant of any
-  // of the nodes provided in the compare nodes array
+  // checks if a given node is a descendant of any of the nodes provided in the
+  // compare nodes array
   const hasAscendant = async (node, compareNodes) => {
-    const hasP = await hasParent(node, compareNodes)
-    if (hasP) {
+    if (await hasParent(node, compareNodes)) {
       return true
     }
 
-    const lookupEdgesIn = async (node) => {
-      const edgesIn = [...node.edgesIn]
-      const p = await Promise.all(
-        edgesIn.map(edge =>
-          edge && edge.from && hasAscendant(edge.from, compareNodes))
-      )
-      return edgesIn.some((edge, index) => p[index])
+    if (node.isTop && node.resolveParent) {
+      return hasAscendant(node.resolveParent, compareNodes)
     }
-    const ancestorFound = (node.isTop && node.resolveParent)
-      ? await hasAscendant(node.resolveParent, compareNodes)
-      : await lookupEdgesIn(node)
-
-    return ancestorFound
+    const hasEdgesIn = await pMap(
+      node.edgesIn,
+      async edge => edge && edge.from && hasAscendant(edge.from, compareNodes),
+      { concurrency: MAP_CONCURRENCY }
+    )
+    return hasEdgesIn.includes(true)
   }
 
   const combinatorsMap = new Map(Object.entries({
+    // direct descendant
     async '>' (prevResults, nextResults) {
-      const p = await Promise.all(
-        nextResults.map(i => hasParent(i, prevResults))
-      )
-      return nextResults.filter((nextItem, index) => p[index])
+      // Return any node in nextResults that has a parent in prevResults
+      const result = []
+      await pMap(nextResults, async node => {
+        if (await hasParent(node, prevResults)) {
+          result.push(node)
+        }
+      }, { concurrency: MAP_CONCURRENCY })
+      return result
     },
+    // any descendant
     async ' ' (prevResults, nextResults) {
-      const p = await Promise.all(
-        nextResults.map(i => hasAscendant(i, prevResults))
-      )
-      return nextResults.filter((nextItem, index) => p[index])
+      // Return any node in nextResults that has an ascendant in prevResults
+      const result = []
+      await pMap(nextResults, async node => {
+        if (await hasAscendant(node, prevResults)) {
+          result.push(node)
+        }
+      }, { concurrency: MAP_CONCURRENCY })
+      return result
     },
+    // sibling
     async '~' (prevResults, nextResults) {
-      const p = await Promise.all(nextResults.map(nextItem => {
-        const seenNodes = new Set()
-        const possibleParentNodes =
-          prevResults
-            .flatMap(node => {
-              seenNodes.add(node)
-              return [...node.edgesIn]
-            })
-            .map(edge => edge.from)
-            .filter(Boolean)
-
-        return !seenNodes.has(nextItem) &&
-          hasParent(nextItem, [...possibleParentNodes])
-      }))
-      return nextResults.filter((nextItem, index) => p[index])
+      // Return any node in nextResults that is a sibling of (aka shares a
+      // parent with) a node in prevResults
+      const parentNodes = new Set() // Parents of everything in prevResults
+      for (const node of prevResults) {
+        for (const edge of node.edgesIn) {
+          // edge.from always exists cause it's from another node's edgesIn
+          parentNodes.add(edge.from)
+        }
+      }
+      const result = []
+      await pMap(nextResults, async node => {
+        if (!prevResults.includes(node) && await hasParent(node, [...parentNodes])) {
+          result.push(node)
+        }
+      }, { concurrency: MAP_CONCURRENCY })
+      return result
     },
   }))
+
   const pseudoMap = new Map(Object.entries({
     async ':attr' () {
       const initialItems = getInitialItems()
@@ -226,23 +242,13 @@ const retrieveNodesFromParsedAst = async ({
           // all its indexes testing for possible objects that may eventually
           // hold more keys specified in a selector
           if (prop === arrayDelimiter) {
-            const newObjs = []
-            for (const obj of objs) {
-              if (Array.isArray(obj)) {
-                obj.forEach((i, index) => {
-                  newObjs.push(obj[index])
-                })
-              } else {
-                newObjs.push(obj)
-              }
-            }
-            objs = newObjs
+            objs = objs.flat()
             continue
           } else {
             // otherwise just maps all currently found objs
             // to the next prop from the lookup properties list,
             // filters out any empty key lookup
-            objs = objs.map(obj => obj[prop]).filter(Boolean)
+            objs = objs.flatMap(obj => obj[prop] || [])
           }
 
           // in case there's no property found in the lookup
@@ -344,26 +350,26 @@ const retrieveNodesFromParsedAst = async ({
         : getInitialItems()
     },
     async ':type' () {
+      // TODO do we really have to iterate three times through the items?
       return currentAstNode.typeValue
         ? getInitialItems()
           .flatMap(node => [...node.edgesIn])
           .filter(edge => npa(`${edge.name}@${edge.spec}`).type === currentAstNode.typeValue)
-          .map(edge => edge.to)
-          .filter(Boolean)
+          .flatMap(edge => edge.to)
         : getInitialItems()
     },
   }))
 
   // retrieves the initial items to which start the filtering / matching
-  // for most of the different types of recognized ast nodes, e.g: class,
-  // id, *, etc in different contexts we need to start with the current list
-  // of filtered results, for example a query for `.workspace` actually
-  // means the same as `*.workspace` so we want to start with the full
-  // inventory if that's the first ast node we're reading but if it appears
-  // in the middle of a query it should respect the previous filtered
-  // results, combinators are a special case in which we always want to
-  // have the complete inventory list in order to use the left-hand side
-  // ast node as a filter combined with the element on its right-hand side
+  // for most of the different types of recognized ast nodes, e.g: class (aka
+  // depType), id, *, etc in different contexts we need to start with the
+  // current list of filtered results, for example a query for `.workspace`
+  // actually means the same as `*.workspace` so we want to start with the full
+  // inventory if that's the first ast node we're reading but if it appears in
+  // the middle of a query it should respect the previous filtered results,
+  // combinators are a special case in which we always want to have the
+  // complete inventory list in order to use the left-hand side ast node as a
+  // filter combined with the element on its right-hand side
   const getInitialItems = () => {
     const firstParsed = currentAstNode.parent.nodes[0] === currentAstNode &&
       currentAstNode.parent.parent.type === 'root'
@@ -419,16 +425,16 @@ const retrieveNodesFromParsedAst = async ({
     results.currentResult =
       await processPendingCombinator(prevResults, nextResults)
   }
-  const classType = async () => {
-    const classFn = classesMap.get(String(currentAstNode))
-    if (!classFn) {
+  const depType = async () => {
+    const depTypeFn = depTypesMap.get(String(currentAstNode))
+    if (!depTypeFn) {
       throw Object.assign(
-        new Error(`\`${String(currentAstNode)}\` is not a supported class.`),
-        { code: 'EQUERYNOCLASS' }
+        new Error(`\`${String(currentAstNode)}\` is not a supported dependency type.`),
+        { code: 'EQUERYNODEPTYPE' }
       )
     }
     const prevResults = results.currentResult
-    const nextResults = await classFn(getInitialItems())
+    const nextResults = await depTypeFn(getInitialItems())
     results.currentResult =
       await processPendingCombinator(prevResults, nextResults)
   }
@@ -449,8 +455,8 @@ const retrieveNodesFromParsedAst = async ({
     if (!pseudoFn) {
       throw Object.assign(
         new Error(`\`${currentAstNode.value
-        }\` is not a supported pseudo-class.`),
-        { code: 'EQUERYNOPSEUDOCLASS' }
+        }\` is not a supported pseudo selector.`),
+        { code: 'EQUERYNOPSEUDO' }
       )
     }
     const prevResults = results.currentResult
@@ -473,11 +479,10 @@ const retrieveNodesFromParsedAst = async ({
       await processPendingCombinator(prevResults, nextResults)
   }
 
-  // maps each of the recognized css selectors
-  // to a function that parses it
+  // maps each of the recognized css selectors to a function that parses it
   const retrieveByType = new Map(Object.entries({
     attribute,
-    class: classType,
+    class: depType,
     combinator,
     id,
     pseudo,
@@ -485,8 +490,8 @@ const retrieveNodesFromParsedAst = async ({
     universal,
   }))
 
-  // walks through the parsed css query and update the
-  // current result after parsing / executing each ast node
+  // walks through the parsed css query and update the current result after
+  // parsing / executing each ast node
   const astNodeQueue = new Set()
   rootAstNode.walk((nextAstNode) => {
     astNodeQueue.add(nextAstNode)
@@ -506,8 +511,8 @@ const retrieveNodesFromParsedAst = async ({
 const querySelectorAll = async (targetNode, query) => {
   const rootAstNode = parser(query)
 
-  // results is going to be a Map in which its values are the
-  // resulting items returned for each parsed css ast selector
+  // results is going to be a Map in which its values are the resulting items
+  // returned for each parsed css ast selector
   const inventory = [...targetNode.root.inventory.values()]
   const res = await retrieveNodesFromParsedAst({
     initialItems: inventory,
