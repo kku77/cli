@@ -1173,7 +1173,7 @@ t.test('audit signatures', async t => {
 
   t.test('third-party registry without keys does not verify', async t => {
     const registryUrl = 'https://verdaccio-clone2.org'
-    const { npm, joinedOutput } = await loadMockNpm(t, {
+    const { npm } = await loadMockNpm(t, {
       prefixDir: installWithThirdPartyRegistry,
       config: {
         '@npmcli:registry': registryUrl,
