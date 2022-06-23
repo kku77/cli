@@ -1194,11 +1194,10 @@ t.test('audit signatures', async t => {
     await registry.package({ manifest })
     registry.nock.get('/-/npm/v1/keys').reply(404)
 
-    await npm.exec('audit', ['signatures'])
-    t.equal(process.exitCode, 0, 'should exit successfully')
-    process.exitCode = 0
-    t.match(joinedOutput(), 'found no packages with missing or invalid registry signatures')
-    t.matchSnapshot(joinedOutput())
+    await t.rejects(
+      npm.exec('audit', ['signatures']),
+      /found no dependencies to audit that where installed from a supported registry/
+    )
   })
 
   t.test('third-party registry with keys and signatures', async t => {
@@ -1451,7 +1450,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /found no dependencies to audit that where installed from a registry/
+      /found no dependencies to audit that where installed from a supported registry/
     )
   })
 
@@ -1473,7 +1472,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /found no dependencies to audit that where installed from a registry/
+      /found no dependencies to audit that where installed from a supported registry/
     )
   })
 
@@ -1500,7 +1499,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /found no dependencies to audit that where installed from a registry/
+      /found no dependencies to audit that where installed from a supported registry/
     )
   })
 
@@ -1530,7 +1529,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /found no dependencies to audit that where installed from a registry/
+      /found no dependencies to audit that where installed from a supported registry/
     )
   })
 
