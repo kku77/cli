@@ -144,6 +144,12 @@ verified registry signatures, audited 1 package in xxx
 
 `
 
+exports[`test/lib/commands/audit.js TAP audit signatures third-party registry without keys does not verify > must match snapshot 1`] = `
+audited 1 package in xxx
+
+found no packages with missing or invalid registry signatures
+`
+
 exports[`test/lib/commands/audit.js TAP audit signatures with both invalid and missing signatures > must match snapshot 1`] = `
 audited 2 packages in xxx
 

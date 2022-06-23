@@ -1171,24 +1171,35 @@ t.test('audit signatures', async t => {
     t.matchSnapshot(joinedOutput())
   })
 
-  // TODO fix
-  // t.test('third-party registry without keys does not verify', async t => {
-  //   const registryUrl = 'https://verdaccio-clone.org'
-  //   const { npm, joinedOutput } = await loadMockNpm(t, {
-  //     prefixDir: installWithThirdPartyRegistry,
-  //     config: {
-  //       '@npmcli:registry': registryUrl
-  //     }
-  //   })
-  //   const registry = new MockRegistry({ tap: t, registry: registryUrl })
-  //   registry.nock.get('/-/npm/v1/keys').reply(404)
+  t.test('third-party registry without keys does not verify', async t => {
+    const registryUrl = 'https://verdaccio-clone2.org'
+    const { npm, joinedOutput } = await loadMockNpm(t, {
+      prefixDir: installWithThirdPartyRegistry,
+      config: {
+        '@npmcli:registry': registryUrl,
+      },
+    })
+    const registry = new MockRegistry({ tap: t, registry: registryUrl })
+    const manifest = registry.manifest({
+      name: '@npmcli/arborist',
+      packuments: [{
+        version: '1.0.14',
+        dist: {
+          tarball: 'https://registry.npmjs.org/@npmcli/arborist/-/@npmcli/arborist-1.0.14.tgz',
+          integrity: 'sha512-caa8hv5rW9VpQKk6tyNRvSaVDySVjo9GkI7Wj/wcsFyxPm3tYrE' +
+                      'sFyTjSnJH8HCIfEGVQNjqqKXaXLFVp7UBag==',
+        },
+      }],
+    })
+    await registry.package({ manifest })
+    registry.nock.get('/-/npm/v1/keys').reply(404)
 
-  //   await npm.exec('audit', ['signatures'])
-  //   t.equal(process.exitCode, 0, 'should exit successfully')
-  //   process.exitCode = 0
-  //   t.match(joinedOutput(), '')
-  //   t.matchSnapshot(joinedOutput())
-  // })
+    await npm.exec('audit', ['signatures'])
+    t.equal(process.exitCode, 0, 'should exit successfully')
+    process.exitCode = 0
+    t.match(joinedOutput(), 'found no packages with missing or invalid registry signatures')
+    t.matchSnapshot(joinedOutput())
+  })
 
   t.test('third-party registry with keys and signatures', async t => {
     const registryUrl = 'https://verdaccio-clone.org'
@@ -1396,7 +1407,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /No dependencies found in current install/
+      /found no installed dependencies to audit/
     )
   })
 
@@ -1440,7 +1451,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /No dependencies found in current install/
+      /found no dependencies to audit that where installed from a registry/
     )
   })
 
@@ -1462,7 +1473,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /No dependencies found in current install/
+      /found no dependencies to audit that where installed from a registry/
     )
   })
 
@@ -1489,7 +1500,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /No dependencies found in current install/
+      /found no dependencies to audit that where installed from a registry/
     )
   })
 
@@ -1519,7 +1530,7 @@ t.test('audit signatures', async t => {
 
     await t.rejects(
       npm.exec('audit', ['signatures']),
-      /No dependencies found in current install/
+      /found no dependencies to audit that where installed from a registry/
     )
   })
 
@@ -1675,7 +1686,7 @@ t.test('audit signatures', async t => {
 
       await t.rejects(
         npm.exec('audit', ['signatures']),
-        /No dependencies found in current install/
+        /found no installed dependencies to audit/
       )
     })
   })
