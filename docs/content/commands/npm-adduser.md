@@ -93,13 +93,13 @@ npm init --scope=@foo --yes
 #### `auth-type`
 
 * Default: "legacy"
-* Type: "legacy", "webauthn", "sso", "saml", or "oauth"
+* Type: "legacy", "web", "sso", "saml", or "oauth"
 * DEPRECATED: The SSO/SAML/OAuth methods are deprecated and will be removed in
   a future version of npm in favor of web-based login.
 
 What authentication strategy to use with `adduser`/`login`.
 
-Pass `webauthn` to use a web-based login.
+Pass `web` to use a web-based login.
 
 <!-- automatically generated, do not edit manually -->
 <!-- see lib/utils/config/definitions.js -->
